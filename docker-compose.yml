@@ -1,0 +1,16 @@
+services:
+  postgres:
+    image: postgres:17
+    container_name: wassel-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: wassel
+      POSTGRES_USER: wassel
+      POSTGRES_PASSWORD: wassel_dev_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
