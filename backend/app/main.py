@@ -3,6 +3,7 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.db.session import engine
+
 from app.models import (
     Business,
     Customer,
@@ -11,15 +12,16 @@ from app.models import (
     Message,
 )
 
+from app.models.base import Base
+
 from app.api.routes import (
     businesses,
     customers,
     conversations,
     messages,
+    products,
+    ai,
 )
-from app.models.base import Base
-
-from app.api.routes import businesses, customers, conversations
 
 
 app = FastAPI(
@@ -49,6 +51,16 @@ app.include_router(
     prefix="/api",
 )
 
+app.include_router(
+    ai.router,
+    prefix="/api",
+)
+
+app.include_router(
+    products.router,
+    prefix="/api",
+)
+
 @app.on_event("startup")
 def create_tables():
     Base.metadata.create_all(bind=engine)
@@ -71,4 +83,3 @@ def database_health_check():
         "status": "ok",
         "database": "connected",
     }
-    
