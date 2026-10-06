@@ -3,6 +3,8 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.db.session import engine
+from app.models import Business, Customer, Product
+from app.models.base import Base
 
 
 app = FastAPI(
@@ -10,6 +12,11 @@ app = FastAPI(
     version=settings.app_version,
     debug=settings.debug,
 )
+
+
+@app.on_event("startup")
+def create_tables():
+    Base.metadata.create_all(bind=engine)
 
 
 @app.get("/health")
