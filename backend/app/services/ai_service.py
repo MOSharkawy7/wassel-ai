@@ -1,4 +1,12 @@
+from openai import OpenAI
+
+from app.core.config import settings
 from app.models import Business, Customer, Conversation, Product
+
+
+client = OpenAI(
+    api_key=settings.openai_api_key,
+)
 
 
 def generate_ai_response(
@@ -8,75 +16,58 @@ def generate_ai_response(
     message: str,
     products: list[Product],
 ) -> str:
-    """
-    Generate a response using the business's real product data.
+    product_context = []
 
-    This is still a temporary local AI engine.
-    A real LLM will replace this logic later.
-    """
+    for product in products:
+        availability = "Available" if product.is_available else "Unavailable"
 
-    message_lower = message.lower()
-
-    if "price" in message_lower or "سعر" in message_lower or "بكام" in message_lower:
-        if not products:
-            return (
-                "أهلاً بيك 👋\n"
-                "حالياً مش لاقي معلومات عن المنتجات والأسعار."
-            )
-
-        available_products = [
-            product
-            for product in products
-            if product.is_available
-        ]
-
-        if not available_products:
-            return (
-                "أهلاً بيك 👋\n"
-                "حالياً مفيش منتجات متاحة."
-            )
-
-        product_lines = []
-
-        for product in available_products:
-            product_lines.append(
-                f"{product.name}: {product.price} {product.currency}"
-            )
-
-        return (
-            "أهلاً بيك 👋\n"
-            "المنتجات والأسعار المتاحة حالياً:\n\n"
-            + "\n".join(product_lines)
+        product_context.append(
+            f"""
+Product:
+Name: {product.name}
+Description: {product.description or "No description"}
+Price: {product.price} {product.currency}
+Availability: {availability}
+""".strip()
         )
 
-    if "hello" in message_lower or "hi" in message_lower:
-        return (
-            f"أهلاً بيك يا {customer.name or 'صديقي'} 👋\n"
-            f"نورت {business.name}! إزاي أقدر أساعدك؟"
-        )
+    products_text = "\n\n".join(product_context)
 
-    if "موجود" in message_lower or "available" in message_lower:
-        available_products = [
-            product
-            for product in products
-            if product.is_available
-        ]
+    system_prompt = f"""
+You are Wassel AI, an AI customer service and sales assistant.
 
-        if not available_products:
-            return "حالياً مفيش منتجات متاحة."
+You work for:
+Business name: {business.name}
+Business description: {business.description or "No description"}
+Business phone: {business.phone_number or "Not provided"}
 
-        product_names = [
-            product.name
-            for product in available_products
-        ]
+Your job is to:
+- Help customers professionally.
+- Understand Egyptian Arabic, English, and mixed Arabic-English messages.
+- Answer questions using the business information provided.
+- Be friendly, concise, and natural.
+- Help customers understand products and prices.
+- Never invent product information, prices, availability, discounts,
+  policies, or other business information.
+- If the requested information is not available in the provided context,
+  clearly tell the customer that you don't have that information.
+- Never claim that you completed an action unless the system actually
+  completed it.
+- If the customer wants something that requires a human employee,
+  politely indicate that a team member can assist them.
 
-        return (
-            "أيوه طبعاً 👌\n"
-            "المنتجات المتاحة حالياً:\n"
-            + "\n".join(f"- {name}" for name in product_names)
-        )
+Customer:
+Name: {customer.name or "Unknown"}
+Phone: {customer.phone_number}
 
-    return (
-        "أهلاً بيك 👋\n"
-        "أنا مساعد Wassel AI. ممكن تقولي محتاج إيه وأنا هساعدك."
+Business products:
+{products_text or "No products have been added yet."}
+""".strip()
+
+    response = client.responses.create(
+        model=settings.openai_model,
+        instructions=system_prompt,
+        input=message,
     )
+
+    return response.output_text.strip()

@@ -11,6 +11,9 @@ class Settings(BaseSettings):
         "@localhost:5433/wassel"
     )
 
+    openai_api_key: str
+    openai_model: str = "gpt-6-luna"
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",
