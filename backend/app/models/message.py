@@ -54,7 +54,6 @@ class Message(Base):
         nullable=False,
     )
 
-    conversation = relationship(
-        "Conversation",
+    conversation: Mapped["Conversation"] = relationship(
         back_populates="messages",
     )

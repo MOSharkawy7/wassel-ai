@@ -1,5 +1,5 @@
 from datetime import datetime
-from app.models.business import Business
+
 from sqlalchemy import DateTime, ForeignKey, String, Text, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -55,10 +55,10 @@ class Customer(Base):
     )
 
     business: Mapped["Business"] = relationship(
-    back_populates="customers",
-   )
+        back_populates="customers",
+    )
 
-conversations: Mapped[list["Conversation"]] = relationship(
-    back_populates="customer",
-    cascade="all, delete-orphan",
-)
+    conversations: Mapped[list["Conversation"]] = relationship(
+        back_populates="customer",
+        cascade="all, delete-orphan",
+    )

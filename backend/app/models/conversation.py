@@ -51,18 +51,15 @@ class Conversation(Base):
         nullable=False,
     )
 
-    business = relationship(
-        "Business",
+    business: Mapped["Business"] = relationship(
         back_populates="conversations",
     )
 
-    customer = relationship(
-        "Customer",
+    customer: Mapped["Customer"] = relationship(
         back_populates="conversations",
     )
 
-    messages = relationship(
-        "Message",
+    messages: Mapped[list["Message"]] = relationship(
         back_populates="conversation",
         cascade="all, delete-orphan",
     )

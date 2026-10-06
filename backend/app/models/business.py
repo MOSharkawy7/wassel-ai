@@ -1,10 +1,10 @@
 from datetime import datetime
 
 from sqlalchemy import DateTime, String, Text, func
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
+
 
 class Business(Base):
     __tablename__ = "businesses"
@@ -28,25 +28,7 @@ class Business(Base):
         String(30),
         nullable=True,
     )
-    
-    products: Mapped[list["Product"]] = relationship(
-        back_populates="business",
-        cascade="all, delete-orphan",
-    )
-    
-    
-    
-    customers: Mapped[list["Customer"]] = relationship(
-        back_populates="business",
-        cascade="all, delete-orphan",
-    )
-    
-    
-    conversations: Mapped[list["Conversation"]] = relationship(
-    back_populates="business",
-    cascade="all, delete-orphan",
-   )
-    
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),
@@ -58,4 +40,19 @@ class Business(Base):
         server_default=func.now(),
         onupdate=func.now(),
         nullable=False,
+    )
+
+    customers: Mapped[list["Customer"]] = relationship(
+        back_populates="business",
+        cascade="all, delete-orphan",
+    )
+
+    products: Mapped[list["Product"]] = relationship(
+        back_populates="business",
+        cascade="all, delete-orphan",
+    )
+
+    conversations: Mapped[list["Conversation"]] = relationship(
+        back_populates="business",
+        cascade="all, delete-orphan",
     )

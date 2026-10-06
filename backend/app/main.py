@@ -3,8 +3,23 @@ from sqlalchemy import text
 
 from app.core.config import settings
 from app.db.session import engine
-from app.models import Business, Customer, Product
+from app.models import (
+    Business,
+    Customer,
+    Product,
+    Conversation,
+    Message,
+)
+
+from app.api.routes import (
+    businesses,
+    customers,
+    conversations,
+    messages,
+)
 from app.models.base import Base
+
+from app.api.routes import businesses, customers, conversations
 
 
 app = FastAPI(
@@ -13,6 +28,26 @@ app = FastAPI(
     debug=settings.debug,
 )
 
+
+app.include_router(
+    businesses.router,
+    prefix="/api",
+)
+
+app.include_router(
+    customers.router,
+    prefix="/api",
+)
+
+app.include_router(
+    conversations.router,
+    prefix="/api",
+)
+
+app.include_router(
+    messages.router,
+    prefix="/api",
+)
 
 @app.on_event("startup")
 def create_tables():
@@ -36,3 +71,4 @@ def database_health_check():
         "status": "ok",
         "database": "connected",
     }
+    
